@@ -136,7 +136,8 @@
     min-height: 100vh;
   }
   #dashboard.open { display: grid; }
-  body.rtl #dashboard { grid-template-columns: 1fr 260px; }
+  /* CSS Grid handles RTL automatically — the 260px column flows from the
+     right-hand side under direction:rtl, so no override is needed. */
 
   .sidebar {
     background: var(--sidebar);
