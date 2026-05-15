@@ -225,13 +225,71 @@
 
   @media (max-width:900px){
     #dashboard{grid-template-columns:1fr}
-    .sidebar{position:relative;height:auto}
-    .kpi-grid{grid-template-columns:1fr 1fr}
+    .sidebar{position:relative;height:auto;padding:18px 0}
+    .side-nav{padding:14px 12px}
+    .side-link{padding:10px 12px;font-size:.88rem}
+    .side-foot{padding:14px 18px}
+    .kpi-grid{grid-template-columns:1fr 1fr;gap:12px;margin-bottom:22px}
+    .kpi{padding:18px}
+    .kpi .value{font-size:1.8rem}
     .two-col{grid-template-columns:1fr}
-    .panel{padding:22px}
-    .top-bar{padding:16px 22px}
+    .panel{padding:18px 14px}
+    .top-bar{padding:14px 18px;flex-wrap:wrap;gap:10px}
+    .top-bar h2{font-size:1.4rem;width:100%}
+    .top-bar .right{width:100%;justify-content:space-between;gap:10px;flex-wrap:wrap}
     .form-grid,.form-grid.triple,.form-grid.quad{grid-template-columns:1fr}
-    .modal-card{padding:30px 22px}
+    .modal-card{padding:24px 18px;max-height:94vh}
+    .card-head{padding:14px 16px}
+    .card-head .actions{width:100%;justify-content:flex-start}
+    .card-body{padding:18px 16px}
+
+    /* Make all tables horizontally scrollable on mobile */
+    .card-body.no-pad{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+    .card-body.no-pad::-webkit-scrollbar{height:6px}
+    .card-body.no-pad::-webkit-scrollbar-track{background:var(--bg-soft)}
+    .card-body.no-pad::-webkit-scrollbar-thumb{background:var(--gold);border-radius:3px}
+    table{min-width:720px}
+    #ordersTable,#productsTable{min-width:820px}
+    #recentOrdersTable{min-width:680px}
+    #topTable{min-width:auto}
+    thead th{padding:12px 14px;font-size:.7rem;white-space:nowrap}
+    tbody td{padding:12px 14px;white-space:nowrap}
+
+    /* Product cell — keep image+name readable when scrolling */
+    .prod-cell{min-width:200px}
+    .prod-swatch{width:44px;height:56px}
+    .prod-info .name{font-size:.92rem}
+    .prod-info .name-ar{font-size:.82rem}
+
+    /* Smaller buttons in tables */
+    .btn-sm{padding:6px 10px;font-size:.74rem}
+
+    /* Login card */
+    .login-card{padding:34px 24px}
+    .login-card h1{font-size:1.6rem}
+
+    /* Stock grid in product modal */
+    .stock-grid{grid-template-columns:repeat(4,1fr);gap:8px}
+    .stock-cell input{padding:9px;font-size:.95rem}
+
+    /* Images row in modal */
+    .images-row{grid-template-columns:repeat(auto-fill,minmax(82px,1fr))}
+
+    /* Status select compact */
+    .order-status-select{padding:5px 8px;font-size:.8rem}
+  }
+
+  @media (max-width:520px){
+    .kpi-grid{grid-template-columns:1fr 1fr;gap:10px}
+    .kpi{padding:14px}
+    .kpi .value{font-size:1.5rem}
+    .top-bar h2{font-size:1.2rem}
+    .top-bar .right{gap:6px}
+    .lang-toggle{padding:5px 10px;font-size:.72rem}
+    .panel{padding:14px 10px}
+    .card-head{flex-direction:column;align-items:flex-start;gap:10px}
+    .modal-card{padding:20px 14px}
+    .modal-card h2{font-size:1.4rem}
   }
 </style>
 </head>
