@@ -20,6 +20,32 @@ const firebaseConfig = {
 window.firebaseConfig = firebaseConfig;
 
 // ============================================================
+// Google Maps — used by the checkout location picker
+// ============================================================
+// 1. Go to https://console.cloud.google.com/
+// 2. Create / select a project, then enable BOTH:
+//      • Maps JavaScript API
+//      • Places API
+//      • Geocoding API
+// 3. Credentials → Create API key → restrict it:
+//      • HTTP referrers → add your domains (e.g. *.vercel.app/*, aboodkhazaleh.github.io/*)
+//      • API restrictions → select the 3 APIs above
+// 4. Paste the key below.
+// 5. (If billing is required, Google's free $200/month credit easily covers
+//     a small store — the location picker is only used on checkout.)
+//
+// If the key is missing or invalid, checkout falls back to a plain text
+// address field and the map section is hidden automatically.
+window.GOOGLE_MAPS_KEY = "PASTE_YOUR_GOOGLE_MAPS_API_KEY";
+
+// Country codes used to bias / restrict address autocomplete results.
+// Edit this list to suit where you deliver (ISO 3166-1 alpha-2).
+window.WAQAR_GMAPS_COUNTRIES = ["jo", "sa", "ae", "kw", "qa", "bh", "om"];
+
+// Default map center (Amman, Jordan) — fallback when no location is picked yet.
+window.WAQAR_GMAPS_DEFAULT_CENTER = { lat: 31.9454, lng: 35.9284 };
+
+// ============================================================
 // Default product seed — used once by the admin's "Seed default
 // products" button to populate Firestore with the initial 6 thobes.
 // Edit freely or remove after you've populated the store yourself.

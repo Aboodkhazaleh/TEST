@@ -1312,6 +1312,127 @@
     font-weight: 500;
   }
   body.rtl .co-field label { letter-spacing: 0.03em; text-transform: none; font-size: 0.92rem; }
+  /* ===== Location picker ===== */
+  .loc-search-row {
+    display: flex;
+    gap: 10px;
+    align-items: stretch;
+  }
+  .loc-search-row input {
+    flex: 1;
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    font-size: 0.98rem;
+    font-family: inherit;
+    transition: border 0.2s, background 0.2s;
+  }
+  .loc-search-row input:focus { outline: none; border-color: var(--gold-deep); background: var(--white); }
+  .loc-here-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 16px;
+    background: var(--ink);
+    color: var(--bg);
+    font-size: 0.82rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: 1px solid var(--ink);
+    transition: all 0.25s;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  body.rtl .loc-here-btn { letter-spacing: 0.03em; text-transform: none; font-size: 0.92rem; }
+  .loc-here-btn:hover { background: var(--gold-deep); border-color: var(--gold-deep); }
+  #coMap {
+    width: 100%;
+    height: 280px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    margin-top: 12px;
+    background: var(--bg);
+    overflow: hidden;
+  }
+  .loc-hint {
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    margin-top: 8px;
+    text-align: center;
+    font-style: italic;
+  }
+  .co-location-display {
+    background: var(--bg-soft);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--gold-deep);
+    padding: 14px 18px;
+    margin-top: 14px;
+    border-radius: 4px;
+    display: none;
+    animation: locFadeIn 0.4s ease;
+  }
+  body.rtl .co-location-display { border-left: 1px solid var(--line); border-right: 3px solid var(--gold-deep); }
+  .co-location-display.set { display: block; }
+  @keyframes locFadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+  .loc-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    align-items: baseline;
+    margin-bottom: 6px;
+    font-size: 0.9rem;
+  }
+  .loc-row:last-of-type { margin-bottom: 0; }
+  .loc-row .lbl {
+    color: var(--ink-soft);
+    font-size: 0.72rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    min-width: 110px;
+  }
+  body.rtl .loc-row .lbl { letter-spacing: 0.03em; text-transform: none; font-size: 0.85rem; }
+  .loc-row .val { color: var(--ink); font-weight: 500; flex: 1; }
+  .loc-row .val.coords { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--gold-deep); }
+  .loc-open {
+    display: inline-block;
+    margin-top: 10px;
+    color: var(--gold-deep);
+    font-size: 0.82rem;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  .loc-open:hover { color: var(--ink); }
+
+  /* Google Places autocomplete dropdown — match luxury theme */
+  .pac-container {
+    border-radius: 4px;
+    border: 1px solid var(--line);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+    font-family: 'Inter', 'Tajawal', sans-serif;
+    background: var(--white);
+    margin-top: 4px;
+    z-index: 999999;
+  }
+  .pac-item {
+    padding: 10px 14px;
+    font-size: 0.92rem;
+    border-top: 1px solid var(--line-soft, #E5D9C0);
+    cursor: pointer;
+  }
+  .pac-item:first-child { border-top: none; }
+  .pac-item:hover, .pac-item-selected { background: var(--bg); }
+  .pac-icon { display: none; }
+  .pac-item-query { color: var(--ink); font-weight: 500; font-size: 0.95rem; }
+  .pac-matched { color: var(--gold-deep); }
+
+  @media (max-width: 600px) {
+    .loc-search-row { flex-direction: column; gap: 8px; }
+    .loc-here-btn { width: 100%; justify-content: center; padding: 12px; }
+    #coMap { height: 240px; }
+    .loc-row .lbl { min-width: auto; flex: 0 0 100%; }
+  }
+
   .co-field input, .co-field textarea {
     width: 100%;
     padding: 14px 16px;
@@ -1787,9 +1908,37 @@
           <label data-i18n="co_phone">Phone Number *</label>
           <input type="tel" id="coPhone" required placeholder="07XXXXXXXX">
         </div>
-        <div class="co-field">
+        <div class="co-field" id="coLocationWrap">
           <label data-i18n="co_address">Delivery Address *</label>
-          <textarea id="coAddress" rows="3" required></textarea>
+          <div class="loc-search-row">
+            <input type="text" id="coLocationSearch" autocomplete="off" data-i18n-attr="placeholder" data-i18n-placeholder="loc_search_placeholder" placeholder="Search for your address or area...">
+            <button type="button" class="loc-here-btn" id="coUseHereBtn" onclick="useCurrentLocation()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+              <span data-i18n="loc_use_here">Use my location</span>
+            </button>
+          </div>
+          <div id="coMap"></div>
+          <div class="loc-hint" data-i18n="loc_drag_hint">Tap the map or drag the pin to fine-tune your exact location.</div>
+          <div id="coSelectedAddr" class="co-location-display">
+            <div class="loc-row">
+              <span class="lbl" data-i18n="loc_pinned">Pinned address</span>
+              <span class="val addr">—</span>
+            </div>
+            <div class="loc-row">
+              <span class="lbl" data-i18n="loc_coords">Coordinates</span>
+              <span class="val coords">—</span>
+            </div>
+            <a class="loc-open" id="coOpenInMaps" target="_blank" rel="noopener">
+              <span data-i18n="loc_open_maps">Open in Google Maps</span> →
+            </a>
+          </div>
+          <input type="hidden" id="coAddress">
+          <input type="hidden" id="coLat">
+          <input type="hidden" id="coLng">
+        </div>
+        <div class="co-field" id="coAddressFallback" style="display:none">
+          <label data-i18n="co_address_fallback">Delivery Address (write it manually) *</label>
+          <textarea id="coAddressText" rows="3" required></textarea>
         </div>
         <div class="co-field">
           <label data-i18n="co_notes">Notes (optional)</label>
@@ -1970,7 +2119,12 @@ const I18N = {
     ig_cta: 'Follow us on Instagram', footer_contact_h: 'Contact',
     co_title: 'Complete Your Order',
     co_sub: "We'll contact you to confirm delivery and arrange payment on arrival.",
-    co_name: 'Full Name *', co_phone: 'Phone Number *', co_address: 'Delivery Address *', co_notes: 'Notes (optional)',
+    co_name: 'Full Name *', co_phone: 'Phone Number *', co_address: 'Delivery Location *', co_notes: 'Notes (optional)',
+    co_address_fallback: 'Delivery Address (write it manually) *',
+    loc_search_placeholder: 'Search for your address or area...',
+    loc_use_here: 'Use my location',
+    loc_drag_hint: 'Tap the map or drag the pin to fine-tune your exact location.',
+    loc_pinned: 'Pinned address', loc_coords: 'Coordinates', loc_open_maps: 'Open in Google Maps',
     place_order: 'Place Order',
     co_info: "Cash on delivery · We'll call to confirm.",
     order_summary: 'Order Summary',
@@ -2023,7 +2177,12 @@ const I18N = {
     ig_cta: 'تابعنا على إنستغرام', footer_contact_h: 'تواصل',
     co_title: 'إتمام الطلب',
     co_sub: 'سنتواصل معك لتأكيد التوصيل وترتيب الدفع عند الاستلام.',
-    co_name: 'الاسم الكامل *', co_phone: 'رقم الهاتف *', co_address: 'عنوان التوصيل *', co_notes: 'ملاحظات (اختياري)',
+    co_name: 'الاسم الكامل *', co_phone: 'رقم الهاتف *', co_address: 'موقع التوصيل *', co_notes: 'ملاحظات (اختياري)',
+    co_address_fallback: 'عنوان التوصيل (اكتبه يدوياً) *',
+    loc_search_placeholder: 'ابحث عن عنوانك أو منطقتك...',
+    loc_use_here: 'استخدم موقعي الحالي',
+    loc_drag_hint: 'اضغط على الخريطة أو اسحب الدبّوس لتحديد موقعك بدقّة.',
+    loc_pinned: 'العنوان المحدّد', loc_coords: 'الإحداثيات', loc_open_maps: 'فتح في خرائط جوجل',
     place_order: 'إرسال الطلب',
     co_info: 'الدفع عند الاستلام · سنتصل بك للتأكيد.',
     order_summary: 'ملخص الطلب',
@@ -2044,6 +2203,10 @@ function applyLang() {
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
     el.innerHTML = t(key);
+  });
+  // Update placeholders that use data-i18n-placeholder
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    el.placeholder = t(el.getAttribute('data-i18n-placeholder'));
   });
   document.getElementById('langLabel').textContent = currentLang === 'en' ? 'عربي' : 'EN';
   renderProducts();
@@ -2453,7 +2616,186 @@ function openCheckoutForm() {
   }).join('');
   document.getElementById('coSummary').innerHTML = lines +
     `<div class="co-line co-total"><span>${t('total')}</span><span>${sub} JOD</span></div>`;
+  // Lazy-load Google Maps the first time checkout is opened
+  initLocationPicker();
 }
+
+/* ============ LOCATION PICKER ============ */
+let _gmapLoaded = false;
+let _gmapLoading = null;
+let _gmap = null, _gmarker = null, _gAutocomplete = null, _gGeocoder = null;
+let _coLocation = null; // { lat, lng, address }
+
+function loadGoogleMaps() {
+  if (_gmapLoaded) return Promise.resolve();
+  if (_gmapLoading) return _gmapLoading;
+  const key = window.GOOGLE_MAPS_KEY;
+  if (!key || String(key).startsWith('PASTE_')) {
+    return Promise.reject(new Error('Google Maps key not configured'));
+  }
+  _gmapLoading = new Promise((resolve, reject) => {
+    window.__waqarGmapInit = () => { _gmapLoaded = true; resolve(); };
+    const s = document.createElement('script');
+    s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&libraries=places&language=${currentLang === 'ar' ? 'ar' : 'en'}&callback=__waqarGmapInit&loading=async`;
+    s.async = true;
+    s.defer = true;
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+  return _gmapLoading;
+}
+
+async function initLocationPicker() {
+  // If map already built, just reset state and exit
+  if (_gmap) { return; }
+  try {
+    await loadGoogleMaps();
+  } catch (e) {
+    console.warn('[Waqar] Maps unavailable — falling back to text address', e);
+    document.getElementById('coLocationWrap').style.display = 'none';
+    document.getElementById('coAddressFallback').style.display = '';
+    return;
+  }
+
+  const center = (window.WAQAR_GMAPS_DEFAULT_CENTER) || { lat: 31.9454, lng: 35.9284 };
+
+  _gmap = new google.maps.Map(document.getElementById('coMap'), {
+    center,
+    zoom: 12,
+    mapTypeControl: false,
+    streetViewControl: false,
+    fullscreenControl: false,
+    gestureHandling: 'greedy',
+    clickableIcons: false,
+    styles: [
+      { elementType: 'geometry', stylers: [{ color: '#f5efe6' }] },
+      { elementType: 'labels.text.stroke', stylers: [{ color: '#fbf8f2' }] },
+      { elementType: 'labels.text.fill', stylers: [{ color: '#4A4039' }] },
+      { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#ffffff' }] },
+      { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#cbd9d8' }] },
+      { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] }
+    ]
+  });
+
+  _gmarker = new google.maps.Marker({
+    map: _gmap,
+    position: center,
+    draggable: true,
+    animation: google.maps.Animation.DROP,
+    icon: {
+      path: 'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z',
+      fillColor: '#8A6E36',
+      fillOpacity: 1,
+      strokeColor: '#1A1612',
+      strokeWeight: 1.5,
+      scale: 2,
+      anchor: new google.maps.Point(12, 22)
+    }
+  });
+
+  _gGeocoder = new google.maps.Geocoder();
+
+  // Autocomplete on the search input
+  const input = document.getElementById('coLocationSearch');
+  const countries = (window.WAQAR_GMAPS_COUNTRIES || []).slice(0, 5);
+  _gAutocomplete = new google.maps.places.Autocomplete(input, {
+    fields: ['formatted_address', 'geometry', 'name'],
+    types: ['geocode'],
+    ...(countries.length ? { componentRestrictions: { country: countries } } : {})
+  });
+  _gAutocomplete.bindTo('bounds', _gmap);
+
+  _gAutocomplete.addListener('place_changed', () => {
+    const place = _gAutocomplete.getPlace();
+    if (!place || !place.geometry || !place.geometry.location) return;
+    if (place.geometry.viewport) _gmap.fitBounds(place.geometry.viewport);
+    else { _gmap.setCenter(place.geometry.location); _gmap.setZoom(17); }
+    _gmarker.setPosition(place.geometry.location);
+    setLocation({
+      lat: place.geometry.location.lat(),
+      lng: place.geometry.location.lng(),
+      address: place.formatted_address || place.name || ''
+    });
+  });
+
+  // Drag the pin → reverse-geocode
+  _gmarker.addListener('dragend', () => {
+    const pos = _gmarker.getPosition();
+    reverseGeocodeAndSet(pos);
+  });
+
+  // Tap the map → move pin
+  _gmap.addListener('click', (e) => {
+    _gmarker.setPosition(e.latLng);
+    reverseGeocodeAndSet(e.latLng);
+  });
+
+  // Try to start centered on the user's location (with permission)
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        const ll = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        _gmap.setCenter(ll);
+        _gmap.setZoom(15);
+        // We don't auto-place the marker — wait for the user to actively pick.
+      },
+      () => { /* permission denied — silent */ },
+      { timeout: 5000, maximumAge: 60000 }
+    );
+  }
+}
+
+function reverseGeocodeAndSet(latLng) {
+  if (!_gGeocoder) return;
+  _gGeocoder.geocode({ location: latLng, language: currentLang === 'ar' ? 'ar' : 'en' }, (results, status) => {
+    const lat = latLng.lat(), lng = latLng.lng();
+    if (status === 'OK' && results && results[0]) {
+      setLocation({ lat, lng, address: results[0].formatted_address });
+    } else {
+      setLocation({ lat, lng, address: '' });
+    }
+  });
+}
+
+function setLocation(loc) {
+  _coLocation = loc;
+  document.getElementById('coAddress').value = loc.address || '';
+  document.getElementById('coLat').value = loc.lat;
+  document.getElementById('coLng').value = loc.lng;
+  const box = document.getElementById('coSelectedAddr');
+  box.classList.add('set');
+  box.querySelector('.addr').textContent = loc.address || (currentLang === 'ar' ? '(لم يُحدّد عنوان نصّي)' : '(no street address found)');
+  box.querySelector('.coords').textContent = `${loc.lat.toFixed(6)}, ${loc.lng.toFixed(6)}`;
+  const open = document.getElementById('coOpenInMaps');
+  open.href = `https://www.google.com/maps?q=${loc.lat},${loc.lng}`;
+}
+
+function useCurrentLocation() {
+  if (!navigator.geolocation) {
+    showToast(currentLang === 'ar' ? 'المتصفح لا يدعم تحديد الموقع' : 'Geolocation not supported', false);
+    return;
+  }
+  const btn = document.getElementById('coUseHereBtn');
+  btn.disabled = true;
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      btn.disabled = false;
+      if (!_gmap) return;
+      const ll = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      _gmap.setCenter(ll);
+      _gmap.setZoom(17);
+      _gmarker.setPosition(ll);
+      reverseGeocodeAndSet(new google.maps.LatLng(ll.lat, ll.lng));
+    },
+    err => {
+      btn.disabled = false;
+      console.warn(err);
+      showToast(currentLang === 'ar' ? 'تعذّر الحصول على موقعك. تأكد من السماح بالوصول.' : "Couldn't get your location. Please allow access.", false);
+    },
+    { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+  );
+}
+window.useCurrentLocation = useCurrentLocation;
 
 function closeCheckoutForm() {
   document.getElementById('checkoutOverlay').classList.remove('open');
@@ -2464,18 +2806,46 @@ function submitOrder(e) {
   e.preventDefault();
   const name = document.getElementById('coName').value.trim();
   const phone = document.getElementById('coPhone').value.trim();
-  const address = document.getElementById('coAddress').value.trim();
   const notes = document.getElementById('coNotes').value.trim();
-  if (!name || !phone || !address) {
-    showToast(currentLang === 'ar' ? 'يرجى إكمال الحقول المطلوبة' : 'Please fill in required fields', false);
+
+  // Location is preferred. If maps loaded, require the user to pick a pin.
+  // If maps failed to load, fall back to the manual text field.
+  let address = '', lat = null, lng = null;
+  const fallbackVisible = document.getElementById('coAddressFallback').style.display !== 'none';
+  if (fallbackVisible) {
+    address = document.getElementById('coAddressText').value.trim();
+  } else {
+    address = document.getElementById('coAddress').value.trim();
+    const latStr = document.getElementById('coLat').value;
+    const lngStr = document.getElementById('coLng').value;
+    lat = latStr ? parseFloat(latStr) : null;
+    lng = lngStr ? parseFloat(lngStr) : null;
+  }
+
+  if (!name || !phone) {
+    showToast(currentLang === 'ar' ? 'يرجى إكمال الاسم ورقم الهاتف' : 'Please fill in name and phone', false);
     return;
   }
+  if (!fallbackVisible && (lat === null || lng === null)) {
+    showToast(currentLang === 'ar' ? 'يرجى تحديد موقع التوصيل على الخريطة' : 'Please pin your delivery location on the map', false);
+    return;
+  }
+  if (fallbackVisible && !address) {
+    showToast(currentLang === 'ar' ? 'يرجى كتابة عنوان التوصيل' : 'Please enter the delivery address', false);
+    return;
+  }
+
   const subtotal = cart.reduce((s, c) => s + c.price * c.qty, 0);
   const order = {
     id: generateOrderId(),
     date: Date.now(),
     status: 'new',
-    customer: { name, phone, address, notes },
+    customer: {
+      name, phone, notes,
+      address: address || '',
+      lat, lng,
+      mapsUrl: (lat !== null && lng !== null) ? `https://www.google.com/maps?q=${lat},${lng}` : ''
+    },
     items: cart.map(c => {
       const p = PRODUCTS.find(x => x.id === c.id);
       return {
@@ -2502,7 +2872,13 @@ function submitOrder(e) {
   document.getElementById('successOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
   // Clear form fields
-  ['coName','coPhone','coAddress','coNotes'].forEach(id => document.getElementById(id).value = '');
+  ['coName','coPhone','coAddress','coNotes','coAddressText','coLat','coLng','coLocationSearch'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  _coLocation = null;
+  const addrBox = document.getElementById('coSelectedAddr');
+  if (addrBox) addrBox.classList.remove('set');
 }
 
 function closeSuccess() {

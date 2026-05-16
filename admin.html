@@ -1040,14 +1040,22 @@ window.toggleOrderDetail = function (id, row) {
   if (!o) return;
   const tr = document.createElement('tr');
   tr.className = 'detail-row';
+  const c = o.customer || {};
+  const hasCoords = (typeof c.lat === 'number' && typeof c.lng === 'number');
+  const mapsUrl = c.mapsUrl || (hasCoords ? `https://www.google.com/maps?q=${c.lat},${c.lng}` : '');
+  const locLine = hasCoords
+    ? `<div><strong>${currentLang === 'ar' ? 'الإحداثيات' : 'Location'}:</strong> <span style="font-family:monospace;color:var(--gold-deep);">${c.lat.toFixed(6)}, ${c.lng.toFixed(6)}</span>
+        &nbsp; <a href="${mapsUrl}" target="_blank" rel="noopener" style="color:var(--gold-deep);text-decoration:underline;">${currentLang === 'ar' ? 'فتح في خرائط جوجل ↗' : 'Open in Google Maps ↗'}</a></div>`
+    : `<div style="color:var(--ink-mid);">${currentLang === 'ar' ? 'لا توجد إحداثيات (عنوان نصّي فقط)' : 'No coordinates (text address only)'}</div>`;
   tr.innerHTML = `
     <td colspan="7" class="order-detail">
       <strong>${currentLang === 'ar' ? 'تفاصيل الطلب' : 'Order details'}</strong>
       <ul class="items">
         ${(o.items||[]).map(i => `<li><span>${escapeHtml(i.name)} · ${i.size} × ${i.qty}</span><span>${(i.price * i.qty)} JOD</span></li>`).join('')}
       </ul>
-      <div>${currentLang === 'ar' ? 'العنوان' : 'Address'}: ${escapeHtml(o.customer?.address || '—')}</div>
-      <div>${currentLang === 'ar' ? 'ملاحظات' : 'Notes'}: ${escapeHtml(o.customer?.notes || '—')}</div>
+      <div><strong>${currentLang === 'ar' ? 'العنوان' : 'Address'}:</strong> ${escapeHtml(c.address || '—')}</div>
+      ${locLine}
+      <div><strong>${currentLang === 'ar' ? 'ملاحظات' : 'Notes'}:</strong> ${escapeHtml(c.notes || '—')}</div>
     </td>`;
   row.parentNode.insertBefore(tr, row.nextSibling);
 };
@@ -1243,17 +1251,23 @@ window.updateOrderStatus = async function (id, status) {
 
 window.exportOrders = function () {
   if (!orders.length) { showToast(t('no_orders')); return; }
-  const header = ['Order ID','Date','Customer','Phone','Address','Items','Total (JOD)','Status'].join(',');
-  const rows = orders.map(o => [
-    o._id,
-    new Date(tsToMillis(o.createdAt)).toISOString(),
-    `"${(o.customer?.name||'').replace(/"/g,'""')}"`,
-    o.customer?.phone || '',
-    `"${(o.customer?.address||'').replace(/"/g,'""')}"`,
-    `"${(o.items||[]).map(i=>`${i.name} ${i.size}×${i.qty}`).join('; ')}"`,
-    o.total || 0,
-    o.status || ''
-  ].join(','));
+  const header = ['Order ID','Date','Customer','Phone','Address','Lat','Lng','Maps URL','Items','Total (JOD)','Status'].join(',');
+  const rows = orders.map(o => {
+    const c = o.customer || {};
+    return [
+      o._id,
+      new Date(tsToMillis(o.createdAt)).toISOString(),
+      `"${(c.name||'').replace(/"/g,'""')}"`,
+      c.phone || '',
+      `"${(c.address||'').replace(/"/g,'""')}"`,
+      c.lat ?? '',
+      c.lng ?? '',
+      c.mapsUrl || (typeof c.lat==='number' && typeof c.lng==='number' ? `https://www.google.com/maps?q=${c.lat},${c.lng}` : ''),
+      `"${(o.items||[]).map(i=>`${i.name} ${i.size}×${i.qty}`).join('; ')}"`,
+      o.total || 0,
+      o.status || ''
+    ].join(',');
+  });
   const csv = [header, ...rows].join('\n');
   const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
   const a = document.createElement('a');
