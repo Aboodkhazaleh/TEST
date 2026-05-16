@@ -968,7 +968,7 @@ function renderOverview() {
   const recent = [...orders].sort((a,b)=>tsToMillis(b.createdAt)-tsToMillis(a.createdAt)).slice(0,5);
   const recentRows = recent.map(o => `
     <tr>
-      <td style="font-family:monospace;color:var(--gold-deep);">#${o._id.slice(-6).toUpperCase()}</td>
+      <td style="font-family:monospace;color:var(--gold-deep);">${o.clientOrderId ? '#'+o.clientOrderId : '#'+o._id.slice(-6).toUpperCase()}</td>
       <td>${escapeHtml(o.customer?.name || '—')}</td>
       <td>${(o.items||[]).reduce((s,i)=>s+(i.qty||0),0)}</td>
       <td>${Math.round(o.total||0)} JOD</td>
@@ -1018,7 +1018,7 @@ function renderOrders() {
   }
   tbody.innerHTML = orders.map(o => `
     <tr class="order-row" onclick="toggleOrderDetail('${o._id}', this)">
-      <td style="font-family:monospace;color:var(--gold-deep);">#${o._id.slice(-6).toUpperCase()}</td>
+      <td style="font-family:monospace;color:var(--gold-deep);">${o.clientOrderId ? '#'+o.clientOrderId : '#'+o._id.slice(-6).toUpperCase()}</td>
       <td>${escapeHtml(o.customer?.name || '—')}</td>
       <td>${escapeHtml(o.customer?.phone || '—')}</td>
       <td>${(o.items||[]).reduce((s,i)=>s+(i.qty||0),0)}</td>
@@ -1047,15 +1047,25 @@ window.toggleOrderDetail = function (id, row) {
     ? `<div><strong>${currentLang === 'ar' ? 'الإحداثيات' : 'Location'}:</strong> <span style="font-family:monospace;color:var(--gold-deep);">${c.lat.toFixed(6)}, ${c.lng.toFixed(6)}</span>
         &nbsp; <a href="${mapsUrl}" target="_blank" rel="noopener" style="color:var(--gold-deep);text-decoration:underline;">${currentLang === 'ar' ? 'فتح في خرائط جوجل ↗' : 'Open in Google Maps ↗'}</a></div>`
     : `<div style="color:var(--ink-mid);">${currentLang === 'ar' ? 'لا توجد إحداثيات (عنوان نصّي فقط)' : 'No coordinates (text address only)'}</div>`;
+  const lbl = (en, ar) => currentLang === 'ar' ? ar : en;
   tr.innerHTML = `
     <td colspan="7" class="order-detail">
-      <strong>${currentLang === 'ar' ? 'تفاصيل الطلب' : 'Order details'}</strong>
+      <div style="display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:10px;">
+        <strong>${lbl('Order details','تفاصيل الطلب')}</strong>
+        <span style="font-family:monospace;color:var(--gold-deep);font-weight:600;">
+          ${lbl('Order #','رقم الطلب')}: ${o.clientOrderId || o._id.slice(-6).toUpperCase()}
+        </span>
+      </div>
       <ul class="items">
         ${(o.items||[]).map(i => `<li><span>${escapeHtml(i.name)} · ${i.size} × ${i.qty}</span><span>${(i.price * i.qty)} JOD</span></li>`).join('')}
       </ul>
-      <div><strong>${currentLang === 'ar' ? 'العنوان' : 'Address'}:</strong> ${escapeHtml(c.address || '—')}</div>
+      <div style="margin-top:10px;display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:0.9rem;">
+        <strong>${lbl('Customer','العميل')}:</strong> <span>${escapeHtml(c.name || '—')}</span>
+        <strong>${lbl('Phone','الهاتف')}:</strong> <span dir="ltr" style="font-family:monospace;">${escapeHtml(c.phone || '—')}</span>
+        <strong>${lbl('Address','العنوان')}:</strong> <span>${escapeHtml(c.address || '—')}</span>
+      </div>
       ${locLine}
-      <div><strong>${currentLang === 'ar' ? 'ملاحظات' : 'Notes'}:</strong> ${escapeHtml(c.notes || '—')}</div>
+      <div style="margin-top:8px;"><strong>${lbl('Notes','ملاحظات')}:</strong> ${escapeHtml(c.notes || '—')}</div>
     </td>`;
   row.parentNode.insertBefore(tr, row.nextSibling);
 };
