@@ -36,7 +36,7 @@ window.firebaseConfig = firebaseConfig;
 //
 // If the key is missing or invalid, checkout falls back to a plain text
 // address field and the map section is hidden automatically.
-window.GOOGLE_MAPS_KEY = AIzaSyAo0dIh6eCYBpMs_fdw5q1xQAu0QhpBdJ8;
+window.GOOGLE_MAPS_API_KEY = AIzaSyAo0dIh6eCYBpMs_fdw5q1xQAu0QhpBdJ8;
 
 // Country codes used to bias / restrict address autocomplete results.
 // Edit this list to suit where you deliver (ISO 3166-1 alpha-2).

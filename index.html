@@ -2629,7 +2629,9 @@ let _coLocation = null; // { lat, lng, address }
 function loadGoogleMaps() {
   if (_gmapLoaded) return Promise.resolve();
   if (_gmapLoading) return _gmapLoading;
-  const key = window.GOOGLE_MAPS_KEY;
+  // Read the API key from firebase-config.js. Accept either name for
+  // backward compatibility.
+  const key = window.GOOGLE_MAPS_API_KEY || window.GOOGLE_MAPS_KEY;
   if (!key || String(key).startsWith('PASTE_')) {
     return Promise.reject(new Error('Google Maps key not configured'));
   }
